@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+   
+   <mapper namespace = "com.example.Mapper.ReplyMapper">   
+   		<select id="getReplyList" parameterType="com.example.Domain.Board" resultType="com.example.Domain.Reply">
+   			SELECT
+   				*
+   			FROM
+   				REPLY
+   			WHERE
+   				POST_NUM = #{postNum}
+   				AND DELETED = 'N'
+   		</select>
+   		
+   		<select id="getNextOrder" parameterType="com.example.Domain.Reply" resultType="int">
+   		
+   			SELECT
+				CASE
+			    WHEN MAX(REPLY.ORDER) IS NULL THEN 1
+			    ELSE MAX(REPLY.ORDER) + 1
+				END AS NEXT_ORDER
+			FROM
+				REPLY
+			WHERE
+				POST_NUM = #{postNum}
+				AND DELETED = 'N'
+   		</select>
+   		
+   		<insert id="insertReplyList" parameterType="com.example.Domain.Reply">
+   			INSERT
+   			INTO
+   				REPLY(post_num, contents, user_id, REPLY.order, created_date)
+   			VALUES
+   				(#{postNum}, #{contents}, #{userId}, 0, now())
+   		</insert>
+   		
+   		<update id="updateReplyList" parameterType="com.example.Domain.Reply">
+   			UPDATE
+   				REPLY
+   			SET
+   				CONTENTS = #{contents},
+   				UPDATED_DATE = NOW()
+   			WHERE
+   				IDX = #{idx}
+   		</update>
+   		
+   		<delete id="deleteReplyList" parameterType="com.example.Domain.Reply">
+   			UPDATE
+   				REPLY
+   			SET
+   				DELETED = 'Y'
+   			WHERE
+   				POST_NUM = #{postNum}
+   				AND IDX = #{idx}
+   		</delete>
+   </mapper>
+   

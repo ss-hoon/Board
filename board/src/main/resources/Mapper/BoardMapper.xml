@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+   
+   <mapper namespace = "com.example.Mapper.BoardMapper">   
+   		<sql id = "innerTable">
+   			SELECT
+				@rownum := @rownum + 1 AS ROWNUM, A.*
+			FROM
+				board A,
+				(SELECT @rownum := 0) B
+			WHERE
+				deleted = 'N'
+   		</sql>
+   		
+   		<!-- 게시글 총 개수 검색 -->
+   		<select id="selectCntAll" resultType="int">
+   			SELECT
+   				COUNT(1)
+   			FROM
+   				BOARD
+   			WHERE
+   				DELETED = 'N'
+   		</select>
+   		
+   		<!-- 검색 조건에 맞는 게시글 총 개수 검색 -->
+   		<select id="selectCntSearch" parameterType="String" resultType="int">
+   			SELECT
+				COUNT(1)
+			FROM
+				BOARD
+			<where>
+				DELETED = 'N' AND
+				<choose>
+					<when test='searchType.equals("writer")'>
+						user_id = #{searchKeyword}
+					</when>
+					<when test='searchType.equals("title")'>
+						title LIKE CONCAT('%', #{searchKeyword}, '%')
+					</when>
+					<when test='searchType.equals("contents")'>
+						contents LIKE CONCAT('%', #{searchKeyword}, '%')
+					</when>
+				</choose>
+			</where>
+   		</select>
+   		
+   		<!-- 게시글 검색 -->
+   		<select id = "selectBoardList" parameterType="com.example.Domain.Paging" resultType = "com.example.Domain.Board">
+   			SELECT
+   				*
+   			FROM
+   				(
+   					SELECT
+   						*
+   					FROM
+   						(
+   							<include refid="innerTable"></include>
+   						) INNER_TABLE
+   					WHERE
+   						ROWNUM &lt;= #{endNo}
+   				) OUTER_TABLE
+   			WHERE
+   				ROWNUM &gt;= #{startNo}
+   			ORDER BY
+   				ROWNUM DESC
+   		</select>
+   		
+   		<!-- 검색 조건에 맞는 게시글 검색 -->
+   		<select id="selectSearchBoardList" parameterType="com.example.Domain.Paging" resultType="com.example.Domain.Board">
+   			SELECT
+   				*
+   			FROM
+   				(
+   					SELECT
+   						*
+   					FROM
+   						(
+   							<include refid="innerTable"></include>
+   							AND
+   							<choose>
+								<when test='searchType.equals("writer")'>
+									user_id = #{searchKeyword}
+								</when>
+								<when test='searchType.equals("title")'>
+									title LIKE CONCAT('%', #{searchKeyword}, '%')
+								</when>
+								<when test='searchType.equals("contents")'>
+									contents LIKE CONCAT('%', #{searchKeyword}, '%')
+								</when>
+							</choose>
+   						) INNER_TABLE
+					WHERE
+						ROWNUM &lt;= #{endNo}
+ 				) OUTER_TABLE
+ 			WHERE
+ 				ROWNUM &gt;= #{startNo}
+ 			ORDER BY
+ 				ROWNUM DESC
+ 		</select>
+   		
+   		<!-- 게시판 상세 검색 -->
+   		<select id = "selectBoardDetail" parameterType = "com.example.Domain.Board" resultType = "com.example.Domain.Board">
+   			SELECT
+   				*
+   			FROM
+   				BOARD
+   			WHERE
+   				post_num = #{postNum}
+   		</select>
+   		
+   		<!-- 게시글 추가 -->
+   		<insert id = "insertBoardList" parameterType = "com.example.Domain.Board">
+   			INSERT 
+   			INTO
+   				BOARD(TITLE, CONTENTS, CREATED_DATE, USER_ID)
+   			VALUES
+   				(#{title}, #{contents}, NOW(), #{userId});
+   		</insert>
+   		
+   		<!-- 게시글 변경 -->
+   		<update id = "updateBoardList" parameterType = "com.example.Domain.Board">
+   			UPDATE 
+   				BOARD
+   			SET
+   				USER_ID = #{userId},
+   				TITLE = #{title},
+   				CONTENTS = #{contents},
+   				UPDATED_DATE = NOW()
+   			WHERE
+   				POST_NUM = #{postNum}
+   		</update>
+   		
+   		<!-- 게시글 삭제 -->
+   		<delete id="deleteBoardList" parameterType="com.example.Domain.Board">
+	   		UPDATE
+	   			BOARD
+	   		SET
+	   			DELETED = 'Y'
+	   		WHERE
+	   			POST_NUM = #{postNum}
+   		</delete>
+   		
+   		<!-- 조회수 증가 -->
+   		<update id="increaseHit" parameterType="com.example.Domain.Board">
+   			UPDATE
+   				BOARD
+   			SET
+   				HIT_CNT = HIT_CNT + 1
+   			WHERE
+   				POST_NUM = #{postNum}
+   		</update>
+   </mapper>
+   

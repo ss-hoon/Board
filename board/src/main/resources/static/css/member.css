@@ -1,0 +1,18 @@
+body {
+	background:#f5f6f7;
+	margin: 0 auto;
+}
+
+.container {
+	padding: 50px;
+	width:450px;
+}
+
+h1 {
+	text-align: center;
+	font-size: 45px;
+}
+
+#btnGroup {
+	align-content: center;
+}
