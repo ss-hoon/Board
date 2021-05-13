@@ -1,0 +1,85 @@
+-- MySQL Workbench Forward Engineering
+
+SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0;
+SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
+SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION';
+
+-- -----------------------------------------------------
+-- Schema mydb
+-- -----------------------------------------------------
+-- -----------------------------------------------------
+-- Schema board
+-- -----------------------------------------------------
+
+-- -----------------------------------------------------
+-- Schema board
+-- -----------------------------------------------------
+CREATE SCHEMA IF NOT EXISTS `board` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci ;
+USE `board` ;
+
+-- -----------------------------------------------------
+-- Table `board`.`member`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `board`.`member` (
+  `user_id` VARCHAR(30) NOT NULL,
+  `user_pw` VARCHAR(40) NOT NULL,
+  `name` VARCHAR(50) NOT NULL,
+  `state` CHAR(1) NOT NULL DEFAULT 'R',
+  `email` VARCHAR(50) NOT NULL,
+  PRIMARY KEY (`user_id`))
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb4
+COLLATE = utf8mb4_0900_ai_ci;
+
+
+-- -----------------------------------------------------
+-- Table `board`.`board`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `board`.`board` (
+  `post_num` INT NOT NULL AUTO_INCREMENT,
+  `title` VARCHAR(30) NOT NULL,
+  `contents` LONGTEXT NOT NULL,
+  `hit_cnt` INT NOT NULL DEFAULT '0',
+  `created_date` DATETIME NOT NULL,
+  `updated_date` DATETIME NULL DEFAULT NULL,
+  `deleted` CHAR(1) NOT NULL DEFAULT 'N',
+  `user_id` VARCHAR(30) NOT NULL,
+  PRIMARY KEY (`post_num`),
+  INDEX `fk_board_member1_idx` (`user_id` ASC) VISIBLE,
+  CONSTRAINT `fk_board_member1`
+    FOREIGN KEY (`user_id`)
+    REFERENCES `board`.`member` (`user_id`))
+ENGINE = InnoDB
+AUTO_INCREMENT = 64
+DEFAULT CHARACTER SET = utf8mb4
+COLLATE = utf8mb4_0900_ai_ci;
+
+
+-- -----------------------------------------------------
+-- Table `board`.`reply`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `board`.`reply` (
+  `idx` INT NOT NULL AUTO_INCREMENT,
+  `post_num` INT NOT NULL,
+  `contents` VARCHAR(100) NOT NULL,
+  `user_id` VARCHAR(45) NOT NULL,
+  `level` INT NOT NULL DEFAULT '1',
+  `order` INT NOT NULL,
+  `created_date` DATETIME NOT NULL,
+  `updated_date` DATETIME NULL DEFAULT NULL,
+  `deleted` CHAR(1) NOT NULL DEFAULT 'N',
+  `parent` INT NOT NULL DEFAULT '0',
+  PRIMARY KEY (`idx`),
+  INDEX `fk_reply_board1_idx` (`post_num` ASC) VISIBLE,
+  CONSTRAINT `fk_reply_board1`
+    FOREIGN KEY (`post_num`)
+    REFERENCES `board`.`board` (`post_num`))
+ENGINE = InnoDB
+AUTO_INCREMENT = 23
+DEFAULT CHARACTER SET = utf8mb4
+COLLATE = utf8mb4_0900_ai_ci;
+
+
+SET SQL_MODE=@OLD_SQL_MODE;
+SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
+SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
